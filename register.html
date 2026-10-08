@@ -1,0 +1,48 @@
+<!DOCTYPE html><html lang="en"><head><title>Register face</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="nav"></div>
+<main>
+  <h1>Register a face</h1>
+  <p class="lead">Enter the name, start the camera, then capture 3 samples. Face the camera in good light, and turn slightly between samples.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="cam"><video id="video" playsinline muted></video></div>
+      <div class="row"><button class="btn alt" id="start">Start camera</button><button class="btn" id="cap" disabled>Capture sample</button></div>
+      <div class="status" id="status">Loading face models...</div>
+    </div>
+    <div class="card">
+      <label for="name">Full name</label><input id="name" placeholder="e.g. Riya Sharma" autocomplete="off">
+      <label for="roll">Roll / ID number</label><input id="roll" placeholder="e.g. CS2026-014" autocomplete="off">
+      <h2 style="margin-top:20px">Samples: <span id="count">0</span> / 3</h2>
+      <div class="row"><button class="btn" id="save" disabled>Save person</button><button class="btn danger" id="reset">Clear samples</button></div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script><script src="js/main.js"></script><script src="js/face.js"></script>
+<script>
+let samples=[],ready=false;
+const v=video;
+loadModels().then(()=>{ready=true;setStatus(status,'Models ready. Start the camera.')})
+  .catch(()=>setStatus(status,'Could not load models. Check your internet connection.','bad'));
+start.onclick=async()=>{
+  try{await startCamera(v);cap.disabled=!ready;setStatus(status,'Camera on.','ok')}
+  catch(e){setStatus(status,'Camera blocked. Allow camera access and use https or localhost.','bad')}
+};
+cap.onclick=async()=>{
+  const r=await getEmbedding(v);
+  if(!r)return setStatus(status,'No face found. Move closer and face the camera.','bad');
+  samples.push(r.embedding);count.textContent=samples.length;
+  setStatus(status,'Sample '+samples.length+' captured.','ok');
+  save.disabled=samples.length<3;
+};
+reset.onclick=()=>{samples=[];count.textContent=0;save.disabled=true};
+save.onclick=()=>{
+  const n=name.value.trim(),rl=roll.value.trim();
+  if(!n||!rl)return toast('Enter name and roll number');
+  const people=DB.people();
+  if(people.some(p=>p.roll===rl))return toast('This roll number already exists');
+  people.push({id:Date.now(),name:n,roll:rl,embeddings:samples});
+  DB.save('people',people);
+  toast(n+' registered');samples=[];count.textContent=0;save.disabled=true;name.value=roll.value='';
+};
+</script></body></html>
