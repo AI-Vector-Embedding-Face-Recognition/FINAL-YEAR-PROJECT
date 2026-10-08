@@ -1,0 +1,50 @@
+<!DOCTYPE html><html lang="en"><head><title>Take attendance</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="css/style.css"></head><body>
+<div id="nav"></div>
+<main>
+  <h1>Take attendance</h1>
+  <p class="lead">Start the camera and look at it. The system scans your face, finds the closest saved vector, and marks you present.</p>
+  <div class="grid">
+    <div class="card">
+      <div class="cam"><video id="video" playsinline muted></video><canvas id="overlay"></canvas></div>
+      <div class="row"><button class="btn" id="start">Start scanning</button><button class="btn alt" id="stop" disabled>Stop</button></div>
+      <div class="status" id="status">Loading face models...</div>
+    </div>
+    <div class="card">
+      <h2>Marked today</h2>
+      <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Time</th></tr></thead><tbody id="list"></tbody></table></div>
+    </div>
+  </div>
+</main>
+<div id="toast"></div>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script><script src="js/main.js"></script><script src="js/face.js"></script>
+<script>
+let timer=null,ready=false;
+loadModels().then(()=>{ready=true;setStatus(status,'Models ready.')}).catch(()=>setStatus(status,'Could not load models.','bad'));
+function draw(){
+  const rows=DB.logs().filter(l=>l.date===DB.today());
+  list.innerHTML=rows.length?rows.map(l=>'<tr><td>'+l.name+'</td><td>'+l.roll+'</td><td>'+l.time+'</td></tr>').join(''):'<tr><td colspan="3">No one marked yet.</td></tr>';
+}
+function mark(m){
+  const logs=DB.logs(),p=m.person;
+  if(logs.some(l=>l.id===p.id&&l.date===DB.today()))return setStatus(status,p.name+' is already marked present today.','ok');
+  logs.push({id:p.id,name:p.name,roll:p.roll,date:DB.today(),time:new Date().toLocaleTimeString(),distance:+m.distance.toFixed(3)});
+  DB.save('logs',logs);draw();
+  setStatus(status,'Present: '+p.name+' (distance '+m.distance.toFixed(2)+')','ok');toast('Attendance saved for '+p.name);
+}
+async function scan(){
+  const r=await getEmbedding(video);
+  const c=overlay,x=c.getContext('2d');c.width=video.videoWidth;c.height=video.videoHeight;x.clearRect(0,0,c.width,c.height);
+  if(!r)return setStatus(status,'Looking for a face...');
+  const m=findMatch(r.embedding);
+  x.lineWidth=4;x.strokeStyle=m?'#14866d':'#c8432b';x.strokeRect(r.box.x,r.box.y,r.box.width,r.box.height);
+  if(m)mark(m);else setStatus(status,'Face not recognised. Register first or try better light.','bad');
+}
+start.onclick=async()=>{
+  if(!ready)return toast('Models still loading');
+  if(!DB.people().length)return setStatus(status,'No registered people. Register a face first.','bad');
+  try{await startCamera(video)}catch(e){return setStatus(status,'Camera blocked. Allow access and use https or localhost.','bad')}
+  stop.disabled=false;start.disabled=true;timer=setInterval(scan,900);
+};
+stop.onclick=()=>{clearInterval(timer);stopCamera(video);stop.disabled=true;start.disabled=false;setStatus(status,'Stopped.')};
+draw();
+</script></body></html>
