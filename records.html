@@ -1,0 +1,209 @@
+<!DOCTYPE html><html lang="en"><head><title>Records and 2D map</title><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet"><style>
+/* ===== Colour codes: change only these ===== */
+:root{
+  --paper:#f3f5f9;      /* page background */
+  --card:#ffffff;       /* panels */
+  --ink:#16213e;        /* main text */
+  --muted:#5f6b85;      /* secondary text */
+  --line:#d5dbe8;       /* borders */
+  --accent:#2f54d6;     /* buttons, links */
+  --accent-soft:#e3e9ff;
+  --ok:#14866d;         /* match / present */
+  --bad:#c8432b;        /* no match / error */
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:'Space Grotesk',system-ui,sans-serif;color:var(--ink);line-height:1.55;
+  
+  /* ===== Background Modification Only ===== */
+  background: #090d16 linear-gradient(#2d3748 1px, transparent 1px) 0 0/100% 32px;
+  background-blend-mode: screen;
+  
+  min-height:100vh}
+a{color:var(--accent)}
+header{background:var(--card);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:5}
+.bar{max-width:1080px;margin:auto;padding:12px 20px;display:flex;gap:18px;align-items:center;flex-wrap:wrap}
+.brand{font-weight:700;text-decoration:none;color:var(--ink);margin-right:auto}
+nav a{text-decoration:none;color:var(--muted);padding:6px 10px;border-radius:6px}
+nav a:hover,nav a.on{background:var(--accent-soft);color:var(--accent)}
+main{max-width:1080px;margin:auto;padding:28px 20px 60px}
+h1{font-size:clamp(1.9rem,5vw,3rem);line-height:1.1;margin-bottom:12px}
+h2{font-size:1.25rem;margin-bottom:10px}
+.lead{color:var(--muted);max-width:60ch;margin-bottom:20px}
+.grid{display:grid;gap:18px;grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:20px}
+.stats{display:grid;gap:14px;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));margin:20px 0}
+.stat b{display:block;font-size:2rem}
+.stat span{color:var(--muted);font-size:.9rem}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:10px 18px;font:inherit;cursor:pointer;text-decoration:none;display:inline-block}
+.btn.alt{background:var(--accent-soft);color:var(--accent)}
+.btn.danger{background:#fbe5e0;color:var(--bad)}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible,input:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.row{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+label{display:block;font-weight:600;margin:12px 0 4px}
+input{width:100%;padding:10px;border:1px solid var(--line);border-radius:8px;font:inherit}
+.cam{position:relative;background:#000;border-radius:10px;overflow:hidden;aspect-ratio:4/3}
+.cam video,.cam canvas{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scaleX(-1)}
+.status{margin-top:12px;padding:10px 12px;border-radius:8px;background:var(--accent-soft)}
+.status.ok{background:#dcf3ec;color:var(--ok)}
+.status.bad{background:#fbe5e0;color:var(--bad)}
+table{width:100%;border-collapse:collapse}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);font-size:.95rem}
+.scroll{overflow-x:auto}
+#map{width:100%;height:auto;background:var(--card);border:1px solid var(--line);border-radius:10px}
+#toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 18px;border-radius:8px;opacity:0;transition:opacity .25s;pointer-events:none}
+#toast.show{opacity:1}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+</style></head><body>
+<div id="nav"></div>
+<main>
+  <h1>Records and 2D embedding map</h1>
+  <p class="lead">Every dot is one face sample. The 128-D vectors are squashed to 2D with PCA, so samples of the same person should sit close together.</p>
+  <canvas id="map" width="900" height="480"></canvas>
+  <div class="grid" style="margin-top:20px">
+    <div class="card"><h2>Attendance log</h2>
+      <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Date</th><th>Time</th></tr></thead><tbody id="logs"></tbody></table></div>
+      <div class="row"><button class="btn" id="csv">Download CSV</button></div></div>
+    <div class="card"><h2>Registered people</h2>
+      <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th></th></tr></thead><tbody id="people"></tbody></table></div>
+      <div class="row"><button class="btn danger" id="wipe">Delete all data</button></div></div>
+  </div>
+</main>
+<div id="toast"></div>
+<script>
+/* Shared: storage, navigation, toast. Data lives in this browser (localStorage). */
+const THRESHOLD = 0.5; // Euclidean distance: lower = same person. Tune with your own data.
+
+const DB = {
+  people: () => JSON.parse(localStorage.getItem('people') || '[]'), // {id,name,roll,embeddings:[[128 nums]...]}
+  logs:   () => JSON.parse(localStorage.getItem('logs')   || '[]'), // {id,name,roll,date,time,distance}
+  save:   (k, v) => localStorage.setItem(k, JSON.stringify(v)),
+  today:  () => new Date().toISOString().slice(0, 10)
+};
+
+function renderNav() {
+  const pages = [['index.html','Home'],['register.html','Register face'],['attendance.html','Take attendance'],['records.html','Records & 2D map']];
+  const here = location.pathname.split('/').pop() || 'index.html';
+  document.getElementById('nav').innerHTML =
+    `<header><div class="bar"><a class="brand" href="index.html">FaceVector Attendance</a><nav>` +
+    pages.map(([h, t]) => `<a href="${h}" class="${h === here ? 'on' : ''}">${t}</a>`).join('') +
+    `</nav></div></header>`;
+}
+
+function toast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+function setStatus(el, msg, type = '') { el.textContent = msg; el.className = 'status ' + type; }
+
+document.addEventListener('DOMContentLoaded', renderNav);
+
+// Escape text before putting it into innerHTML.
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+</script><script>
+/* Camera + face embedding (128-D) using face-api.js, all in the browser. */
+const MODEL_URL = 'https://cdn.jsdelivr.net/npm/@vladmandic/face-api/model/';
+let stream = null;
+
+async function loadModels() {
+  await faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL);
+  await faceapi.nets.faceLandmark68Net.loadFromUri(MODEL_URL);
+  await faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL);
+}
+
+async function startCamera(video) {
+  // Works on phone and laptop. Needs https:// or localhost.
+  stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user', width: 640, height: 480 }, audio: false });
+  video.srcObject = stream;
+  await video.play();
+}
+
+function stopCamera(video) {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+  stream = null; video.srcObject = null;
+}
+
+// Returns {embedding:[128 numbers], box} or null if no face found.
+async function getEmbedding(video) {
+  const r = await faceapi.detectSingleFace(video, new faceapi.TinyFaceDetectorOptions({ inputSize: 320 }))
+    .withFaceLandmarks().withFaceDescriptor();
+  return r ? { embedding: Array.from(r.descriptor), box: r.detection.box } : null;
+}
+
+function euclidean(a, b) {
+  let s = 0;
+  for (let i = 0; i < a.length; i++) s += (a[i] - b[i]) ** 2;
+  return Math.sqrt(s);
+}
+
+// Compare one embedding with every stored one; return the closest person.
+function findMatch(embedding) {
+  let best = null;
+  for (const p of DB.people())
+    for (const e of p.embeddings) {
+      const d = euclidean(embedding, e);
+      if (!best || d < best.distance) best = { person: p, distance: d };
+    }
+  return best && best.distance < THRESHOLD ? best : null;
+}
+
+// 2D method: project 128-D embeddings to 2D with PCA (power iteration).
+function pca2D(X) {
+  const n = X.length, m = X[0].length;
+  const mean = Array(m).fill(0);
+  X.forEach(r => r.forEach((v, i) => mean[i] += v / n));
+  const C = X.map(r => r.map((v, i) => v - mean[i]));
+  const comps = [];
+  for (let k = 0; k < 2; k++) {
+    let v = Array.from({ length: m }, () => Math.random() - 0.5);
+    for (let it = 0; it < 60; it++) {
+      const w = Array(m).fill(0);
+      C.forEach(r => { const s = r.reduce((a, x, i) => a + x * v[i], 0); r.forEach((x, i) => w[i] += s * x); });
+      if (k === 1) { const d = w.reduce((a, x, i) => a + x * comps[0][i], 0); w.forEach((x, i) => w[i] = x - d * comps[0][i]); }
+      const len = Math.hypot(...w) || 1; v = w.map(x => x / len);
+    }
+    comps.push(v);
+  }
+  return C.map(r => comps.map(c => r.reduce((a, x, i) => a + x * c[i], 0)));
+}
+
+</script>
+<script>
+const color=i=>'hsl('+(i*67%360)+',65%,42%)';
+function drawMap(){
+  const ps=DB.people(),pts=[];
+  ps.forEach((p,i)=>p.embeddings.forEach(e=>pts.push({e,i,name:p.name})));
+  const c=map,x=c.getContext('2d');x.clearRect(0,0,c.width,c.height);x.font='15px sans-serif';
+  if(!pts.length){x.fillStyle='#5f6b85';x.fillText('No data yet. Register a face to see the map.',20,30);return}
+  const xy=pca2D(pts.map(p=>p.e));
+  const xs=xy.map(a=>a[0]),ys=xy.map(a=>a[1]);
+  const mn=a=>Math.min(...a),mx=a=>Math.max(...a),pad=50;
+  const sx=v=>pad+(mx(xs)===mn(xs)?.5:(v-mn(xs))/(mx(xs)-mn(xs)))*(c.width-2*pad);
+  const sy=v=>pad+(mx(ys)===mn(ys)?.5:(v-mn(ys))/(mx(ys)-mn(ys)))*(c.height-2*pad);
+  const seen={};
+  xy.forEach((a,k)=>{
+    const p=pts[k],px=sx(a[0]),py=sy(a[1]);
+    x.fillStyle=color(p.i);x.beginPath();x.arc(px,py,7,0,7);x.fill();
+    if(!seen[p.i]){seen[p.i]=1;x.fillText(p.name,px+10,py-8)}
+  });
+}
+function draw(){
+  const L=DB.logs().slice().reverse(),P=DB.people();
+  logs.innerHTML=L.length?L.map(l=>'<tr><td>'+esc(l.name)+'</td><td>'+esc(l.roll)+'</td><td>'+l.date+'</td><td>'+l.time+'</td></tr>').join(''):'<tr><td colspan="4">No records yet.</td></tr>';
+  people.innerHTML=P.length?P.map(p=>'<tr><td>'+esc(p.name)+'</td><td>'+esc(p.roll)+'</td><td><button class="btn danger" onclick="del('+p.id+')">Remove</button></td></tr>').join(''):'<tr><td colspan="3">No one registered.</td></tr>';
+  drawMap();
+}
+function del(id){DB.save('people',DB.people().filter(p=>p.id!==id));draw();toast('Person removed')}
+csv.onclick=()=>{
+  const rows=[['Name','Roll','Date','Time']].concat(DB.logs().map(l=>[l.name,l.roll,l.date,l.time]));
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob([rows.map(r=>r.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(',')).join('\n')],{type:'text/csv'}));
+  a.download='attendance.csv';a.click();
+};
+wipe.onclick=()=>{if(confirm('Delete all people and attendance?')){localStorage.clear();draw()}};
+draw();
+</script></body></html>
