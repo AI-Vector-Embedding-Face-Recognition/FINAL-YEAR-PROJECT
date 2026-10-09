@@ -1,150 +1,153 @@
-/**
- * Edge-AI Biometric Authentication Engine - Core Execution Module
- * Project: High-Dimensional Face Embedding System for Automated Attendance
- * 
- * Architectural Overview:
- * Handles Client-Side Persistence Layer (localStorage), Vector Distance Metrics,
- * Dynamic Navigation Injection, and Global Application Telemetry.
- */
+/* ===== Colour tokens: change colours here ===== */
+:root {
+  --bg:        #EEF2F7;   /* page background */
+  --surface:   #FFFFFF;   /* cards and panels */
+  --ink:       #14213D;   /* main text, header */
+  --muted:     #5A6782;   /* secondary text */
+  --line:      #D5DCE8;   /* borders */
+  --accent:    #5B4BDB;   /* buttons, links */
+  --accent-ink:#FFFFFF;
+  --match:     #0F8B6D;   /* attendance accepted */
+  --reject:    #C23B5A;   /* attendance rejected */
+  --s1:        #5B4BDB;   /* student 1 */
+  --s2:        #E08A00;   /* student 2 */
+  --s3:        #0F8B8D;   /* student 3 */
+  --scan:      #14213D;   /* new scan dot */
+}
 
-// Classification Threshold for Multi-Dimensional Euclidean Variance
-const SPATIAL_DISTANCE_THRESHOLD = 0.5; 
-
-/**
- * Biometric Relational Storage Engine (Abstraction Layer)
- * Manages localized structured JSON structures for profiles and access logs.
- */
-const BIOMETRIC_DB = {
-  // Retrieves compiled identity registries containing 128-D vector arrays
-  getIdentities: () => JSON.parse(localStorage.getItem('sys_biometric_profiles') || localStorage.getItem('people') || '[]'),
-  
-  // Retrieves historical validation logs containing time-series metrics
-  getTelemetryLedger: () => JSON.parse(localStorage.getItem('sys_telemetry_ledger') || localStorage.getItem('logs') || '[]'),
-  
-  // Commits mutated structural arrays back to the persistent local storage instance
-  commitToDisk: (storageKey, dataPayload) => localStorage.setItem(storageKey, JSON.stringify(dataPayload)),
-  
-  // Generates ISO-8601 compliant system datestamps for temporal indexing
-  getSystemDateStamp: () => new Date().toISOString().slice(0, 10),
-  
-  // Backward compatibility wrapper for pre-existing UI modules
-  people: function() { return this.getIdentities(); },
-  logs: function() { return this.getTelemetryLedger(); },
-  today: function() { return this.getSystemDateStamp(); }
-};
-
-/**
- * High-Dimensional Linear Algebra Utilities
- * Computes spatial vectors to determine identity classifications.
- */
-const VectorMath = {
-  /**
-   * Calculates the Euclidean distance between two 128-dimensional coordinate arrays.
-   * Formula: d(x, y) = sqrt( sum( (xi - yi)^2 ) )
-   */
-  calculateEuclideanDistance: (vectorA, vectorB) => {
-    if (vectorA.length !== vectorB.length) {
-      throw new Error("Vector dimension mismatch: Vectors must be exactly 128-D.");
-    }
-    const squaredSum = vectorA.reduce((sum, value, index) => sum + Math.pow(value - vectorB[index], 2), 0);
-    return Math.sqrt(squaredSum);
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg:      #0E1424;
+    --surface: #18203A;
+    --ink:     #E8ECF6;
+    --muted:   #9AA6C2;
+    --line:    #2B3556;
+    --accent:  #8C80FF;
+    --accent-ink:#0E1424;
+    --match:   #3DD6A8;
+    --reject:  #FF7A98;
+    --s1:      #8C80FF;
+    --s2:      #FFB340;
+    --s3:      #3FD0D2;
+    --scan:    #E8ECF6;
   }
-};
-
-/**
- * UI Component Orchestrator: Dynamic Navigation Assembly
- * Injects semantic layouts and real-time status telemetry flags into the global bar structure.
- */
-function initializeGlobalNavigation() {
-  // Configured precisely with your explicit project status bar naming rules
-  const applicationRoutes = [
-    ['index.html', 'Home'],
-    ['register.html', 'Register face'],
-    ['attendance.html', 'Take attendance'],
-    ['records.html', 'Records & 2D map']
-  ];
-  
-  const currentPathname = location.pathname.split('/').pop() || 'index.html';
-  const navigationContainer = document.getElementById('nav');
-  
-  if (!navigationContainer) return;
-
-  // Compile individual anchor targets dynamically with project-level routing flags
-  const routesMarkup = applicationRoutes.map(([routeUrl, routeLabel]) => {
-    // Dynamic fallback checking to handle both legacy 'on' and modern active layout tokens
-    const isActive = (routeUrl === currentPathname);
-    const activeClass = isActive ? 'class="on active-route"' : '';
-    return `<a href="${routeUrl}" ${activeClass}>${routeLabel}</a>`;
-  }).join('');
-
-  // Extract live metrics directly from storage layers to showcase operational system parameters
-  const enrolledCount = BIOMETRIC_DB.getIdentities().length;
-  const verifiedTodayCount = BIOMETRIC_DB.getTelemetryLedger().filter(log => log.date === BIOMETRIC_DB.getSystemDateStamp()).length;
-
-  // Injects structural architecture incorporating real-time system metrics directly into the header bar
-  navigationContainer.innerHTML = `
-    <header class="app-header">
-      <div class="bar header-container">
-        FaceVector Attendance</a>
-        <nav class="navigation-links">
-          ${routesMarkup}
-        </nav>
-        
-        <!-- Edge System Telemetry Indicators Layer -->
-        <div class="header-status-bar" style="display: flex; gap: 10px; align-items: center; margin-left: auto; font-size: 0.8rem; font-weight: 600; font-family: sans-serif;">
-          <span style="color: #00F2FE; background: rgba(0, 242, 254, 0.1); border: 1px solid rgba(0, 242, 254, 0.2); padding: 4px 8px; border-radius: 4px; text-transform: uppercase;">
-            Edge Node: Online
-          </span>
-          <span style="color: #F9FAFB; background: #1F2937; border: 1px solid #374151; padding: 4px 8px; border-radius: 4px;">
-            Enrolled: ${enrolledCount}
-          </span>
-          <span style="color: #10B981; background: rgba(16, 185, 129, 0.1); border: 1px solid rgba(16, 185, 129, 0.2); padding: 4px 8px; border-radius: 4px;">
-            Verified Today: ${verifiedTodayCount}
-          </span>
-        </div>
-      </div>
-    </header>
-  `;
 }
 
-/**
- * Event-Driven Notification System (Toast Alert Subsystem)
- * Dispatches temporal runtime alerts to notify users of processing actions.
- */
-function dispatchSystemToast(notificationMessage) {
-  const toastNode = document.getElementById('toast');
-  if (!toastNode) return;
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  color: var(--ink);
+  font-family: "Segoe UI", system-ui, -apple-system, Arial, sans-serif;
+  line-height: 1.55;
   
-  toastNode.textContent = notificationMessage;
-  // Accounts for both legacy and stylized active alert tokens safely
-  toastNode.classList.add('show', 'toast-active');
-  
-  setTimeout(() => {
-    toastNode.classList.remove('show', 'toast-active');
-  }, 2500);
+  /* ===== Formal Academic Background Grid System Modification ===== */
+  background-color: var(--bg);
+  background-image: 
+    linear-gradient(var(--line) 1px, transparent 1px),
+    linear-gradient(90deg, var(--line) 1px, transparent 1px);
+  background-size: 32px 32px;
+  background-blend-mode: normal;
+  min-height: 100vh;
 }
 
-/**
- * Runtime Status Matrix Display Handler
- * Updates targeted status UI components with strict semantic states.
- */
-function updateComponentStatus(domElement, displayMessage, operationalState = 'info') {
-  if (!domElement) return;
-  domElement.textContent = displayMessage;
-  
-  // Standard map to fallback properties dynamically
-  let stylingToken = operationalState;
-  if (operationalState === 'success') stylingToken = 'ok';
-  if (operationalState === 'error') stylingToken = 'bad';
-  
-  domElement.className = `status status-indicator state-${operationalState} ${stylingToken}`;
+h1, h2 { margin: 0 0 .4rem; line-height: 1.2; }
+h2 { font-size: 1.1rem; }
+p  { margin: 0 0 .6rem; }
+
+.site-header {
+  background: var(--ink);
+  color: var(--bg);
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+}
+.site-header h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); }
+.site-header p  { max-width: 60ch; margin: 0 auto; opacity: .85; }
+
+main { max-width: 1100px; margin: 0 auto; padding: 1.5rem 1.25rem 3rem; display: grid; gap: 1.5rem; }
+
+.steps, .formulas { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+
+.steps article, .formulas article, .map-panel, .control-panel, .flow {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 1.1rem 1.2rem;
+}
+.steps p, .formulas p, .hint { color: var(--muted); font-size: .95rem; }
+
+/* Demo */
+.demo { display: grid; gap: 1rem; grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr); }
+@media (max-width: 800px) { .demo { grid-template-columns: 1fr; } }
+
+canvas {
+  width: 100%; height: auto;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  cursor: crosshair;
+  touch-action: manipulation;
 }
 
-// Global Backward Compatibility Bindings for HTML UI Scripts
-const DB = BIOMETRIC_DB;
-const THRESHOLD = SPATIAL_DISTANCE_THRESHOLD;
-const toast = dispatchSystemToast;
-const setStatus = updateComponentStatus;
+.legend { list-style: none; display: flex; flex-wrap: wrap; gap: 1rem; padding: 0; margin: .8rem 0 0; font-size: .9rem; }
+.swatch { display: inline-block; width: 12px; height: 12px; border-radius: 50%; margin-right: .4rem; }
+.s1 { background: var(--s1); } .s2 { background: var(--s2); } .s3 { background: var(--s3); } .scan { background: var(--scan); }
 
-// Attach execution hooks onto the client rendering pipeline
-document.addEventListener('DOMContentLoaded', initializeGlobalNavigation);
+/* Controls */
+.control-panel label { display: block; margin: 1rem 0 .3rem; font-weight: 600; font-size: .95rem; }
+select, input[type="range"] { width: 100%; }
+select {
+  padding: .5rem; border-radius: 6px;
+  border: 1px solid var(--line); background: var(--surface); color: var(--ink);
+}
+input[type="range"] { accent-color: var(--accent); }
+
+button {
+  margin-top: 1rem; width: 100%;
+  padding: .7rem 1rem; border: 0; border-radius: 6px;
+  background: var(--accent); color: var(--accent-ink);
+  font: inherit; font-weight: 600; cursor: pointer;
+}
+button:hover { filter: brightness(1.1); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+
+.result {
+  margin-top: 1rem; padding: .8rem 1rem; border-radius: 8px;
+  display: grid; gap: .1rem; border-left: 5px solid var(--line);
+  background: var(--bg);
+}
+.result.ok   { border-left-color: var(--match);  }
+.result.ok strong   { color: var(--match); }
+.result.fail { border-left-color: var(--reject); }
+.result.fail strong { color: var(--reject); }
+.result span { color: var(--muted); font-size: .9rem; }
+
+.numbers { display: grid; grid-template-columns: auto 1fr; gap: .3rem .8rem; margin: 1rem 0 0; font-size: .95rem; }
+.numbers dt { color: var(--muted); }
+.numbers dd { margin: 0; font-weight: 600; text-align: right; }
+
+code {
+  display: block; margin: .4rem 0 .6rem; padding: .6rem .8rem;
+  background: var(--bg); border-radius: 6px;
+  font-family: Consolas, "Courier New", monospace; overflow-x: auto;
+}
+
+.flow ol { list-style: none; display: flex; flex-wrap: wrap; gap: .6rem; padding: 0; margin: .6rem 0 0; }
+.flow li { padding: .45rem .8rem; border: 1px solid var(--line); border-radius: 999px; background: var(--bg); font-size: .92rem; }
+.flow li:not(:last-child)::after { content: "\2192"; margin-left: .7rem; color: var(--muted); }
+
+footer { text-align: center; padding: 1.5rem 1.25rem; color: var(--muted); border-top: 1px solid var(--line); }
+
+/* ===== Live camera ===== */
+.camera-section { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 1.1rem 1.2rem; }
+.camera-grid { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); margin-top: .8rem; }
+.video-box { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: .6rem; text-align: center; }
+.video-box video, .video-box canvas {
+  width: 100%; aspect-ratio: 4 / 3; object-fit: cover;
+  background: var(--ink); border-radius: 6px; cursor: default;
+}
+#video { transform: scaleX(-1); }            /* mirror the preview like a selfie */
+.cam-status { margin: .5rem 0 0; color: var(--muted); font-size: .9rem; }
+.cam-buttons { display: grid; gap: .6rem; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-top: .6rem; }
+.cam-buttons button { margin-top: 0; }
+button:disabled { opacity: .45; cursor: not-allowed; filter: none; }
