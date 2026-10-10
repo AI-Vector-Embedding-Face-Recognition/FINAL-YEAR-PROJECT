@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>About | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<h1>About this project</h1>
+<p class="lead">A face recognition attendance system built on vector embeddings. The camera, the face model and the data store all run in your browser.</p>
+<div class="grid">
+  <div class="card"><h2>What is a vector embedding?</h2>
+    <p>It turns something complex, like a face, into a list of numbers. This system uses 128 numbers per face, for example <code>[0.12, -0.45, 0.78, ...]</code>.</p>
+    <p>Two photos of the same person give vectors that are close together. Different people give vectors that are far apart.</p></div>
+  <div class="card"><h2>Why not compare pixels?</h2>
+    <p>Light, shadows, angle and image quality change pixel values a lot. The embedding keeps the facial pattern and ignores most of that noise.</p></div>
+</div>
+
+<h2 style="margin-top:26px">How two faces are compared</h2>
+<div class="grid">
+  <div class="card"><h3>Euclidean distance (used to decide)</h3>
+    <div class="formula">d(A,B) = sqrt( sum (a<sub>i</sub> - b<sub>i</sub>)<sup>2</sup> )</div>
+    <p>Straight-line distance between two vectors. Smaller means more similar. A match needs distance below the threshold (default 0.50, adjustable in Admin).</p></div>
+  <div class="card"><h3>Cosine similarity (shown for information)</h3>
+    <div class="formula">cos = (A &middot; B) / (|A| |B|)</div>
+    <p>Compares the angle between vectors. Close to 1 means very similar direction. The best threshold must be found by testing with your own data.</p></div>
+</div>
+
+<h2 style="margin-top:26px">Attendance flow</h2>
+<div class="card"><p class="mono">Camera &rarr; detect face &rarr; quality check &rarr; 128-D embedding &rarr; compare with saved vectors &rarr; threshold + margin check &rarr; same person on 2 scans &rarr; save name, session, date, time</p>
+  <ul class="clean" style="margin-top:12px">
+    <li><b>Quality check:</b> blurry, tiny or dim faces are rejected instead of guessed.</li>
+    <li><b>Margin check:</b> if two people are almost equally close, the system says "not sure".</li>
+    <li><b>Two scans in a row:</b> the same person must be matched twice to reduce false positives.</li>
+    <li><b>2D map:</b> PCA squashes 128 numbers to 2, so you can see the clusters on the <a href="lab.html">2D Lab</a> page.</li>
+  </ul></div>
+
+<h2 style="margin-top:26px">Technology</h2>
+<div class="card scroll"><table>
+  <tr><th>Part</th><th>Used here</th></tr>
+  <tr><td>Frontend</td><td>HTML, CSS, JavaScript (separate files, linked)</td></tr>
+  <tr><td>Face model</td><td>face-api.js (detector, landmarks, 128-D recognition net)</td></tr>
+  <tr><td>Camera</td><td>Browser getUserMedia, front or back camera on phones</td></tr>
+  <tr><td>Data store</td><td>Browser localStorage (names, vectors, attendance)</td></tr>
+  <tr><td>Next step</td><td>Node.js + Express + MongoDB with vector search for many students</td></tr>
+</table></div>
+
+<h2 style="margin-top:26px">Privacy</h2>
+<div class="card"><p>Face vectors are personal biometric data. Here they are stored only in this browser and never uploaded. Always get permission before registering someone's face, and delete data you no longer need from the Admin page.</p></div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+</body></html>
