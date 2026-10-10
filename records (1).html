@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Records | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<h1>Attendance records</h1>
+<p class="lead">Every attendance mark with name, roll number, session, date and time. Filter, check percentages and download a CSV.</p>
+<div class="stats">
+  <div class="card stat"><b id="k1">0</b><span>Total records</span></div>
+  <div class="card stat"><b id="k2">0</b><span>Days with attendance</span></div>
+  <div class="card stat"><b id="k3">0</b><span>Registered people</span></div>
+  <div class="card stat"><b id="k4">0</b><span>Present today</span></div>
+</div>
+<div class="card">
+  <div class="filters">
+    <div><label for="fdate">Date</label><input type="date" id="fdate"></div>
+    <div><label for="fsession">Session</label><select id="fsession"></select></div>
+    <div><label for="fsearch">Search name or roll</label><input id="fsearch" placeholder="Search..." autocomplete="off"></div>
+    <div class="row" style="margin:0"><button class="btn alt" id="fclear">Clear filters</button><button class="btn" id="csv">Download CSV</button></div>
+  </div>
+  <div class="scroll" style="margin-top:14px"><table><thead><tr><th>Name</th><th>Roll</th><th>Session</th><th>Date</th><th>Time</th></tr></thead><tbody id="logs"></tbody></table></div>
+</div>
+<h2 style="margin-top:26px">Attendance percentage per student</h2>
+<div class="card scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Days present</th><th>Progress</th><th>%</th></tr></thead><tbody id="summary"></tbody></table>
+  <p class="muted" style="margin-top:10px;font-size:.9rem">Percentage = days present / days on which attendance was taken. Red bar means below 75%.</p></div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+<script src="js/records.js"></script></body></html>
