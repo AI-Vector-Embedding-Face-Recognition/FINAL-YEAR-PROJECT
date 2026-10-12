@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>FaceVector Attendance: preview</title>
+<link rel="stylesheet" href="css/preview.css">
+</head>
+<body>
+<div class="top">
+  <b>FaceVector Attendance: preview</b>
+  <div class="tabs" id="tabs"></div>
+  <div><button id="mo" class="on">Output</button> <button id="mc">Code</button></div>
+  <div id="devs"><button id="dl" class="on">Laptop</button> <button id="ph">Mobile</button></div>
+</div>
+<div class="note" id="note">
+  <span>Real pages load below. Sample data is loaded the first time.</span>
+  <button id="seed">Load sample data</button><button id="unseed">Remove sample data</button>
+</div>
+<div class="stage" id="stage"><iframe id="f" title="Page preview" allow="camera"></iframe></div>
+<div class="code" id="code" hidden>
+  <div class="files" id="files"></div>
+  <div class="view">
+    <div class="vh"><b id="fn"></b><span id="fi"></span><button id="cp">Copy code</button></div>
+    <pre id="pre" tabindex="0"></pre>
+  </div>
+</div>
+<script src="js/preview.js"></script>
+</body>
+</html>
