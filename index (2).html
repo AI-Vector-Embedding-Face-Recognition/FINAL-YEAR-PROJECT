@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Home | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<section class="hero">
+  <div>
+    <h1>Attendance by face, stored as numbers</h1>
+    <p class="lead">Each face becomes a 128-number vector (an embedding). A new face is compared with the saved vectors by distance. If it is close enough, the person is marked present and their name and time are saved.</p>
+    <div class="row">
+      <a class="btn" href="register.html">Register a face</a>
+      <a class="btn alt" href="attendance.html">Take attendance</a>
+      <a class="btn alt" href="lab.html">See the 2D map</a>
+    </div>
+  </div>
+  <svg viewBox="0 0 360 260" role="img" aria-label="Face vectors drawn as clusters of dots on a 2D map" style="width:100%;background:#fff;border:1px solid var(--line);border-radius:12px">
+    <g stroke="#e4e9f3"><path d="M40 20V230M100 20V230M160 20V230M220 20V230M280 20V230M340 20V230M20 50H350M20 110H350M20 170H350M20 220H350"/></g>
+    <g class="c1"><circle cx="85" cy="80" r="8"/><circle cx="105" cy="95" r="8"/><circle cx="92" cy="105" r="8"/></g>
+    <g class="c2"><circle cx="230" cy="70" r="8"/><circle cx="248" cy="88" r="8"/><circle cx="222" cy="92" r="8"/></g>
+    <g class="c3"><circle cx="150" cy="190" r="8"/><circle cx="170" cy="200" r="8"/><circle cx="160" cy="176" r="8"/></g>
+    <g font-size="13" font-weight="700" fill="#16213e"><text x="60" y="66">Riya</text><text x="212" y="56">Arjun</text><text x="130" y="228">Meera</text></g>
+    <path d="M280 150L240 100" stroke="#16213e" stroke-dasharray="5 4"/>
+    <path d="M280 134l4 9 10 1-8 6 3 10-9-6-9 6 3-10-8-6 10-1z" fill="#f2b632" stroke="#16213e" stroke-width="1.5"/>
+    <text x="300" y="150" font-size="13" font-weight="700" fill="#16213e">new face</text>
+  </svg>
+</section>
+
+<div class="stats">
+  <div class="card stat"><b id="s1">0</b><span>Registered people</span></div>
+  <div class="card stat"><b id="s2">0</b><span>Present today</span></div>
+  <div class="card stat"><b id="s3">0</b><span>Total records</span></div>
+</div>
+
+<h2>How it works</h2>
+<div class="grid sm" style="margin-bottom:26px">
+  <div class="card"><h3>1. Capture</h3><p>The phone or laptop camera sees the face in the browser.</p></div>
+  <div class="card"><h3>2. Embed</h3><p>A model turns the face into a 128-D vector. The background is ignored.</p></div>
+  <div class="card"><h3>3. Match</h3><p>The closest saved vector wins if its distance is below the threshold.</p></div>
+  <div class="card"><h3>4. Record</h3><p>Name, roll number, session, date and time are saved once per day.</p></div>
+</div>
+
+<h2>Explore the project</h2>
+<div class="grid sm">
+  <a class="card" href="register.html"><h3>Register face</h3><p class="muted">Add a student with 5 face samples.</p></a>
+  <a class="card" href="attendance.html"><h3>Take attendance</h3><p class="muted">Live camera scan that marks people present.</p></a>
+  <a class="card" href="records.html"><h3>Records</h3><p class="muted">Filter, percentages, CSV download.</p></a>
+  <a class="card" href="lab.html"><h3>2D Lab</h3><p class="muted">See face vectors on a 2D map.</p></a>
+  <a class="card" href="admin.html"><h3>Admin</h3><p class="muted">Manage students, threshold, backup.</p></a>
+  <a class="card" href="about.html"><h3>About</h3><p class="muted">Vector embedding, distance and the workflow.</p></a>
+</div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+</body></html>
