@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Register face | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<h1>Register a face</h1>
+<p class="lead">Enter the details, start the camera, then capture 5 samples. Use good light, and turn your head slightly between samples.</p>
+<div class="grid">
+  <div class="card">
+    <div class="cam"><video id="video" playsinline muted></video><canvas id="overlay"></canvas><div class="ph">Camera is off</div></div>
+    <div class="row">
+      <button class="btn alt" id="start">Start camera</button>
+      <button class="btn alt" id="flip" disabled>Switch camera</button>
+      <button class="btn" id="cap" disabled>Capture sample</button>
+      <span class="badge" id="quality">Camera off</span>
+    </div>
+    <div class="status" id="status" role="status">Loading face models...</div>
+  </div>
+  <div class="card">
+    <label for="name">Full name</label><input id="name" placeholder="e.g. Riya Sharma" autocomplete="off">
+    <div class="two">
+      <div><label for="roll">Roll / ID number</label><input id="roll" placeholder="e.g. CS2026-014" autocomplete="off"></div>
+      <div><label for="cls">Class (optional)</label><input id="cls" placeholder="e.g. BCA 3rd year" autocomplete="off"></div>
+    </div>
+    <h3>Samples: <span id="count">0</span> / 5</h3>
+    <div class="meter" id="bar"><i></i></div>
+    <div class="row"><button class="btn" id="save" disabled>Save person</button><button class="btn danger" id="reset">Clear samples</button></div>
+    <h3 style="margin-top:22px">Recently registered</h3>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Class</th></tr></thead><tbody id="recent"></tbody></table></div>
+  </div>
+</div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script><script src="js/face.js"></script><script src="js/register.js"></script></body></html>
