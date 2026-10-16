@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Attendance | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<h1>Take attendance</h1>
+<p class="lead">Start scanning and look at the camera. The system finds the closest saved face vector and marks the person present.</p>
+<div class="grid">
+  <div class="card">
+    <label for="session">Class / session</label><input id="session" placeholder="e.g. Maths period 1" autocomplete="off">
+    <div class="cam" style="margin-top:12px"><video id="video" playsinline muted></video><canvas id="overlay"></canvas><div class="ph">Camera is off</div></div>
+    <div class="row"><button class="btn" id="start">Start scanning</button><button class="btn alt" id="flip" disabled>Switch camera</button></div>
+    <div class="status" id="status" role="status">Loading face models...</div>
+    <div class="result" id="result"><span class="muted">Results appear here.</span></div>
+  </div>
+  <div class="card">
+    <h2>Marked today <span class="badge ok" id="present">0 / 0</span></h2>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Session</th><th>Time</th></tr></thead><tbody id="list"></tbody></table></div>
+    <div class="row"><a class="btn alt" href="records.html">All records</a><a class="btn alt" href="register.html">Register someone</a></div>
+  </div>
+</div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api/dist/face-api.js"></script><script src="js/face.js"></script><script src="js/attendance.js"></script></body></html>
