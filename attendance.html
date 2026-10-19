@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Attendance | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="js/theme.js"></script>
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<h1>Take attendance</h1>
+<p class="lead">Start scanning and look at the camera. The system finds the closest saved face vector and marks the person present.</p>
+<div class="grid">
+  <div class="card">
+    <label for="session">Class / session</label><input id="session" placeholder="e.g. Maths period 1" autocomplete="off" maxlength="40">
+    <div class="cam mt12"><video id="video" playsinline muted></video><canvas id="overlay"></canvas><div class="ph">Camera is off</div></div>
+    <div class="row"><button class="btn" id="start">Start scanning</button><button class="btn alt" id="flip" disabled>Switch camera</button><select id="camsel" class="camsel" aria-label="Choose camera" hidden></select></div>
+    <div class="status" id="status" role="status">Loading face models...</div>
+    <div class="result" id="result"><span class="muted">Results appear here.</span></div>
+  </div>
+  <div class="card">
+    <h2>Marked today <span class="badge ok" id="present">0 / 0</span></h2>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Session</th><th>Time</th></tr></thead><tbody id="list"></tbody></table></div>
+    <div class="row"><a class="btn alt" href="records.html">All records</a><a class="btn alt" href="register.html">Register someone</a></div>
+  </div>
+</div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@vladmandic/face-api@1.7.13/dist/face-api.js" crossorigin="anonymous"></script>
+<script src="js/face.js"></script><script src="js/attendance.js"></script></body></html>
