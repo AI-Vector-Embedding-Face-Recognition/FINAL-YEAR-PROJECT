@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self' https://fonts.googleapis.com; font-src https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' blob:; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'self' blob:; base-uri 'none'; form-action 'none'; object-src 'none'">
+<meta name="referrer" content="no-referrer">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#ffffff">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Admin | FaceVector Attendance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="js/theme.js"></script>
+</head>
+<body>
+<div id="nav"></div>
+<main>
+<h1>Admin</h1>
+<div class="card mw420" id="setup" hidden>
+  <h2>Create admin password</h2>
+  <p class="muted fs9">First time on this device. Choose a password you will remember: at least 8 characters with letters and numbers.</p>
+  <form id="setupForm" autocomplete="off">
+    <label for="sp1">New password</label><input type="password" id="sp1" autocomplete="new-password" minlength="8" maxlength="128" required>
+    <label for="sp2">Repeat password</label><input type="password" id="sp2" autocomplete="new-password" minlength="8" maxlength="128" required>
+    <div class="row"><button class="btn" type="submit">Create password</button></div>
+    <div id="setupMsg" role="status"></div>
+  </form>
+</div>
+
+<div class="card mw420" id="gate" hidden>
+  <h2>Admin login</h2>
+  <form id="loginForm">
+    <label for="pw">Password</label><input type="password" id="pw" autocomplete="current-password" maxlength="128" required>
+    <div class="row"><button class="btn" type="submit">Log in</button><button class="btn alt" type="button" id="forgot">Forgot password</button></div>
+    <div id="loginMsg" role="status"></div>
+    <p class="muted mt12 fs9">The password is stored only as a salted hash. After 5 wrong tries the login locks for 5 minutes. You are logged out after 15 minutes without activity.</p>
+  </form>
+</div>
+
+<div id="panel" hidden>
+  <div class="row mt0"><button class="btn alt" id="logout">Log out</button></div>
+  <div class="stats">
+    <div class="card stat"><b id="a1">0</b><span>Students</span></div>
+    <div class="card stat"><b id="a2">0</b><span>Attendance records</span></div>
+    <div class="card stat"><b id="a3">0</b><span>Days recorded</span></div>
+  </div>
+  <div class="card"><h2>Manage students</h2>
+    <div class="scroll"><table><thead><tr><th>Name</th><th>Roll</th><th>Class</th><th>Samples</th><th></th></tr></thead><tbody id="plist"></tbody></table></div></div>
+
+  <div class="grid mt14">
+    <div class="card"><h2>Recognition settings</h2>
+      <label for="thr">Distance threshold: <b id="thrv"></b></label><input type="range" id="thr" min="0.30" max="0.80" step="0.01">
+      <p class="muted fs9">Lower = stricter (fewer false matches, more rejects). Higher = looser.</p>
+      <label for="mar">Margin between best and 2nd person: <b id="marv"></b></label><input type="range" id="mar" min="0" max="0.20" step="0.01">
+      <div class="row"><button class="btn" id="saveSet">Save settings</button></div></div>
+    <div class="card"><h2>Change password</h2>
+      <form id="passForm"><label for="cp">Current password</label><input type="password" id="cp" autocomplete="current-password" maxlength="128" required>
+      <label for="np">New password</label><input type="password" id="np" autocomplete="new-password" minlength="8" maxlength="128" required>
+      <div class="row"><button class="btn" type="submit">Change</button></div><div id="passMsg" role="status"></div></form></div>
+    <div class="card"><h2>Backup</h2>
+      <p class="muted">Save all students, face vectors and records to a file, or restore from one.</p>
+      <div class="row"><button class="btn" id="export">Export backup</button></div>
+      <label for="import">Import backup (.json)</label><input type="file" id="import" accept="application/json"></div>
+    <div class="card"><h2>Danger zone</h2>
+      <div class="row"><button class="btn danger" id="clearLogs">Delete all records</button><button class="btn danger" id="clearAll">Delete everything</button></div></div>
+  </div>
+</div>
+</main>
+<div id="foot"></div>
+<script src="js/main.js"></script>
+<script src="js/admin.js"></script></body></html>
