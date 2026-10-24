@@ -1,0 +1,14 @@
+{
+  "name": "facevector-attendance",
+  "version": "1.0.0",
+  "description": "Browser-only face-recognition attendance using 128-D vector embeddings (face-api.js), with a local voice-enabled FaceVector AI assistant.",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes serve -l 8080 .",
+    "start:python": "python3 -m http.server 8080",
+    "test": "node scripts/check-project.js && node --test tests/core.test.js && node scripts/security-check.js",
+    "test:e2e": "python3 tests/e2e-assistant.py",
+    "security-check": "node scripts/security-check.js"
+  },
+  "license": "UNLICENSED"
+}
