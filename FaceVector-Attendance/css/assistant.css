@@ -1,0 +1,107 @@
+/* FaceVector AI assistant. Uses the site's theme variables (--card, --ink, --accent ...) so it follows
+   Auto / Light / Dark and every colour scheme from js/theme.js. No inline styles (strict CSP). */
+.fvai{--fvai-gap:16px;font-family:inherit;color:var(--ink)}
+.fvai *{box-sizing:border-box}
+
+/* ---- floating button ---- */
+.fvai-fab{position:fixed;z-index:50;right:calc(var(--fvai-gap) + env(safe-area-inset-right,0px));bottom:calc(var(--fvai-gap) + env(safe-area-inset-bottom,0px));
+  display:flex;align-items:center;gap:8px;min-height:56px;min-width:56px;padding:0 16px 0 14px;border:0;border-radius:99px;cursor:pointer;font:inherit;font-weight:600;
+  background:var(--accent);color:var(--on-accent);box-shadow:var(--shadow);touch-action:manipulation;animation:fvai-bob 4s ease-in-out infinite}
+.fvai-fab:hover{filter:brightness(1.08)}
+.fvai-fab:focus-visible,.fvai button:focus-visible,.fvai textarea:focus-visible,.fvai a:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.fvai-fab svg{width:26px;height:26px;flex:none}
+.fvai-fab .fvai-dot{position:absolute;top:8px;right:10px;width:10px;height:10px;border-radius:50%;background:var(--ok);border:2px solid var(--card)}
+@keyframes fvai-bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-3px)}}
+@media(max-width:520px){.fvai-fab .fvai-fablabel{display:none}.fvai-fab{padding:0 14px}}
+@media(prefers-reduced-motion:reduce){.fvai-fab,.fvai-listen i,.fvai-typing i{animation:none}}
+.fvai[data-state=open] .fvai-fab,.fvai[data-state=max] .fvai-fab,.fvai[data-state=min] .fvai-fab{display:none}
+
+/* ---- panel ---- */
+.fvai-panel{position:fixed;z-index:51;right:calc(var(--fvai-gap) + env(safe-area-inset-right,0px));bottom:calc(var(--fvai-gap) + env(safe-area-inset-bottom,0px));
+  width:min(400px,calc(100vw - 2 * var(--fvai-gap)));height:min(580px,calc(100dvh - 90px - env(safe-area-inset-top,0px)));display:none;flex-direction:column;
+  background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;box-shadow:var(--shadow);overflow:hidden}
+.fvai[data-state=open] .fvai-panel,.fvai[data-state=max] .fvai-panel,.fvai[data-state=min] .fvai-panel{display:flex}
+.fvai[data-state=max] .fvai-panel{width:min(780px,calc(100vw - 2 * var(--fvai-gap)));height:calc(100dvh - 90px - env(safe-area-inset-top,0px))}
+.fvai[data-state=min] .fvai-panel{height:auto}
+.fvai[data-state=min] .fvai-body,.fvai[data-state=min] .fvai-foot,.fvai[data-state=min] .fvai-sub{display:none}
+@media(max-width:520px){.fvai{--fvai-gap:8px}.fvai-panel{width:calc(100vw - 16px);height:min(78dvh,calc(100dvh - 80px))}.fvai[data-state=max] .fvai-panel{width:calc(100vw - 16px);height:calc(100dvh - 80px)}}
+
+.fvai-head{display:flex;align-items:center;gap:6px;padding:10px 10px 10px 14px;background:var(--accent);color:var(--on-accent)}
+.fvai-head h2{font-size:1rem;margin:0;margin-right:auto;display:flex;align-items:center;gap:8px;line-height:1.2}
+.fvai-head h2 small{display:block;font-weight:400;font-size:.72rem;opacity:.9}
+.fvai-head svg{width:22px;height:22px;flex:none}
+.fvai-ib{display:grid;place-items:center;width:36px;height:36px;border:0;border-radius:8px;background:transparent;color:inherit;cursor:pointer;touch-action:manipulation}
+.fvai-ib:hover{background:rgba(127,127,127,.28)}
+.fvai-ib svg{width:20px;height:20px}
+.fvai-ib[aria-pressed=true]{background:rgba(127,127,127,.38)}
+.fvai-head .fvai-ib:focus-visible{outline-color:var(--on-accent)}
+
+.fvai-sub{display:flex;gap:6px;align-items:center;flex-wrap:wrap;padding:6px 10px;border-bottom:1px solid var(--line);background:var(--accent-soft);font-size:.82rem}
+.fvai-sub label{display:inline-flex;align-items:center;gap:6px;margin:0;font-weight:600}
+.fvai-sub select{width:auto;padding:3px 6px;font-size:.85rem;min-height:30px}
+.fvai-tab{border:0;background:transparent;color:var(--accent);font:inherit;font-weight:600;padding:5px 10px;border-radius:6px;cursor:pointer;min-height:32px}
+.fvai-tab[aria-selected=true]{background:var(--accent);color:var(--on-accent)}
+.fvai-badge{margin-left:auto;font-size:.75rem;padding:2px 8px;border-radius:99px;background:var(--card);border:1px solid var(--line);color:var(--muted)}
+
+.fvai-body{flex:1;min-height:0;display:flex;flex-direction:column}
+.fvai-log,.fvai-sec{flex:1;min-height:0;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:10px;overscroll-behavior:contain}
+.fvai-msg{max-width:92%;padding:9px 12px;border-radius:12px;font-size:.95rem;line-height:1.45;word-break:break-word;white-space:pre-wrap}
+.fvai-msg.bot{align-self:flex-start;background:var(--accent-soft);border-bottom-left-radius:4px}
+.fvai-msg.user{align-self:flex-end;background:var(--accent);color:var(--on-accent);border-bottom-right-radius:4px}
+.fvai-msg.err{background:var(--bad-soft);color:var(--bad)}
+.fvai-msg.ok{background:var(--ok-soft);color:var(--ok)}
+.fvai-msg.warn{background:var(--warn-soft);color:var(--warn)}
+.fvai-msg b{font-weight:700}
+.fvai-msg ol{margin:6px 0 0 1.2em;padding:0;white-space:normal}.fvai-msg li{margin:3px 0}
+.fvai-msg .fvai-note{display:block;margin-top:6px;font-size:.85rem;opacity:.92}
+.fvai-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.fvai-act{border:1px solid var(--accent);background:var(--card);color:var(--accent);font:inherit;font-size:.85rem;border-radius:99px;padding:5px 12px;cursor:pointer;min-height:32px;text-decoration:none;display:inline-flex;align-items:center;touch-action:manipulation}
+.fvai-act:hover{background:var(--accent);color:var(--on-accent)}
+.fvai-act.danger{border-color:var(--bad);color:var(--bad)}.fvai-act.danger:hover{background:var(--bad);color:#fff}
+.fvai-act:disabled{opacity:.5;cursor:not-allowed}
+.fvai-res{display:block;width:100%;text-align:left;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;border-radius:10px;padding:8px 10px;margin-top:6px;cursor:pointer}
+.fvai-res:hover{border-color:var(--accent)}
+.fvai-res b{display:block}.fvai-res span{font-size:.85rem;color:var(--muted)}
+.fvai-res em{font-style:normal;font-size:.72rem;color:var(--accent);text-transform:uppercase;letter-spacing:.04em}
+.fvai-typing{align-self:flex-start;display:flex;gap:4px;padding:10px 12px;background:var(--accent-soft);border-radius:12px}
+.fvai-typing i{width:7px;height:7px;border-radius:50%;background:var(--accent);animation:fvai-blink 1s infinite}
+.fvai-typing i:nth-child(2){animation-delay:.15s}.fvai-typing i:nth-child(3){animation-delay:.3s}
+@keyframes fvai-blink{50%{opacity:.25}}
+
+.fvai-chips{display:flex;gap:6px;overflow-x:auto;padding:6px 10px;border-top:1px solid var(--line);scrollbar-width:thin;flex:none}
+.fvai-chip{flex:none;border:1px solid var(--line);background:var(--card);color:var(--ink);font:inherit;font-size:.82rem;border-radius:99px;padding:5px 12px;cursor:pointer;min-height:32px;white-space:nowrap;touch-action:manipulation}
+.fvai-chip:hover{border-color:var(--accent);color:var(--accent)}
+
+.fvai-listen{display:flex;align-items:center;gap:8px;padding:6px 12px;background:var(--bad-soft);color:var(--bad);font-size:.85rem;border-top:1px solid var(--line);flex:none}
+.fvai-listen i{width:10px;height:10px;border-radius:50%;background:var(--bad);animation:fvai-blink 1s infinite}
+.fvai-listen button{margin-left:auto}
+
+.fvai-foot{display:flex;gap:6px;align-items:flex-end;padding:8px 10px calc(8px + env(safe-area-inset-bottom,0px) * 0);border-top:1px solid var(--line);flex:none}
+.fvai-foot textarea{flex:1;min-width:0;resize:none;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font:inherit;font-size:max(16px,1rem);background:var(--field);color:var(--ink);max-height:110px;min-height:42px;line-height:1.35}
+.fvai-send,.fvai-mic{flex:none;width:42px;height:42px;border:0;border-radius:10px;cursor:pointer;display:grid;place-items:center;touch-action:manipulation}
+.fvai-send{background:var(--accent);color:var(--on-accent)}
+.fvai-mic{background:var(--accent-soft);color:var(--accent)}
+.fvai-mic[aria-pressed=true]{background:var(--bad);color:#fff}
+.fvai-send:disabled,.fvai-mic:disabled{opacity:.45;cursor:not-allowed}
+.fvai-send svg,.fvai-mic svg{width:20px;height:20px}
+.fvai-hint{font-size:.72rem;color:var(--muted);padding:0 12px 6px;flex:none}
+
+/* ---- security view ---- */
+.fvai-sec h3{margin:8px 0 2px;font-size:.95rem}
+.fvai-sec p{margin:0;font-size:.88rem}
+.fvai-issue{border:1px solid var(--line);border-left-width:5px;border-radius:10px;padding:8px 10px;font-size:.88rem;background:var(--card)}
+.fvai-issue.critical,.fvai-issue.high{border-left-color:var(--bad)}.fvai-issue.medium{border-left-color:var(--warn-line)}.fvai-issue.low{border-left-color:var(--accent)}.fvai-issue.info{border-left-color:var(--line)}
+.fvai-issue .fvai-ih{display:flex;gap:6px;align-items:center;flex-wrap:wrap;font-weight:700}
+.fvai-issue .fix{display:block;margin-top:4px;color:var(--muted)}
+.fvai-issue time{margin-left:auto;font-weight:400;font-size:.75rem;color:var(--muted)}
+.fvai-audit{font-family:ui-monospace,Consolas,monospace;font-size:.76rem;border-bottom:1px solid var(--line);padding:3px 0;word-break:break-word}
+
+body.fvai-on footer{padding-bottom:calc(16px + 76px + env(safe-area-inset-bottom,0px))}
+@media print{.fvai{display:none!important}}
+
+/* compact toolbar + more room for messages */
+.fvai-tools{flex-wrap:nowrap;gap:4px;padding:5px 8px;overflow-x:auto}
+.fvai-tools .fvai-act{font-size:.78rem;padding:3px 9px;min-height:30px;white-space:nowrap;flex:none}
+.fvai-tools select{min-height:30px;padding:2px 4px;font-size:.8rem;flex:none}
+.fvai-talking .fvai-chips,.fvai-talking .fvai-hint{display:none}
+@media(max-height:700px){.fvai-hint{display:none}}
